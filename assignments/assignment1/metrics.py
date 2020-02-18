@@ -18,19 +18,6 @@ def binary_classification_metrics(prediction, ground_truth):
     # Some helpful links:
     # https://en.wikipedia.org/wiki/Precision_and_recall
     # https://en.wikipedia.org/wiki/F1_score
-    # Implementing below
-    predicted_positive = sum(prediction)
-    tp = sum(prediction*ground_truth)
-    fp = predicted_positive - tp
-
-    precision = tp/predicted_positive
-    recall = tp/sum(ground_truth)
-    f1 = 2/(1/recall + 1/precision)
-
-    accuracy = sum(prediction==ground_truth) / len(ground_truth)
-
-    
-    
     return precision, recall, f1, accuracy
 
 

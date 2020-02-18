@@ -101,7 +101,7 @@ class KNN:
         dists = np.zeros((num_test, num_train), np.float32)
         # TODO: Implement computing all distances with no loops!
         # Done below
-        dists = np.sum(np.abs(X[:,np.newaxis] - self.train_X), axis=2)
+        dists = np.sum(np.abs(X[:, np.newaxis] - self.train_X), axis=2)
         return dists
 
     def predict_labels_binary(self, dists):
@@ -122,7 +122,7 @@ class KNN:
             # TODO: Implement choosing best class based on k
             # nearest training samples
             # Done below
-            idx = dists[i,:].argsort()[:self.k]
+            idx = dists[i, :].argsort()[:self.k]
             pred[i] = np.mean(self.train_y[idx])
         return pred
 
@@ -139,10 +139,12 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        num_test = dists.shape[0]
         pred = np.zeros(num_test, np.int)
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
-            pass
+            # Done below
+            idx = dists[i, :].argsort()[:self.k]
+            lst_classes = list(self.train_y[idx])
+            pred[i] = max(set(lst_classes), key=lst_classes.count)
         return pred
