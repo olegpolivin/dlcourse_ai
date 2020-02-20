@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def check_gradient(f, x, delta=1e-5, tol = 1e-4):
+def check_gradient(f, x, delta=1e-5, tol=1e-4):
     '''
     Checks the implementation of analytical gradient by comparing
     it to numerical gradient using two-point formula
@@ -15,10 +15,10 @@ def check_gradient(f, x, delta=1e-5, tol = 1e-4):
     Return:
       bool indicating whether gradients match or not
     '''
-    
+
     assert isinstance(x, np.ndarray)
     assert x.dtype == np.float
-    
+
     orig_x = x.copy()
     fx, analytic_grad = f(x)
     assert np.all(np.isclose(orig_x, x, tol)), "Functions shouldn't modify input variables"
@@ -32,7 +32,12 @@ def check_gradient(f, x, delta=1e-5, tol = 1e-4):
     while not it.finished:
         ix = it.multi_index
         analytic_grad_at_ix = analytic_grad[ix]
-        numeric_grad_at_ix = 0
+        x1 = x.copy()
+        x1[ix] = x1[ix] - delta
+        x2 = x.copy()
+        x2[ix] = x2[ix] + delta
+
+        numeric_grad_at_ix = (f(x2)[0] - f(x1)[0])/(2*delta)
 
         # TODO compute value of numeric gradient of f to idx
         if not np.isclose(numeric_grad_at_ix, analytic_grad_at_ix, tol):
@@ -43,7 +48,3 @@ def check_gradient(f, x, delta=1e-5, tol = 1e-4):
 
     print("Gradient check passed!")
     return True
-
-        
-
-        
