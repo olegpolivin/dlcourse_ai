@@ -156,7 +156,6 @@ class LinearSoftmaxClassifier():
 
         loss_history = []
         for epoch in range(epochs):
-            loss = 0
             shuffled_indices = np.arange(num_train)
             np.random.shuffle(shuffled_indices)
             sections = np.arange(batch_size, num_train, batch_size)
