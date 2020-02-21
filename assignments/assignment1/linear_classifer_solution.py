@@ -10,7 +10,7 @@ def softmax(predictions):
         classifier output
 
     Returns:
-      probs, np array of the same shape as predictions - 
+      probs, np array of the same shape as predictions -
         probability for every class, 0..1
     '''
     # TODO implement softmax
@@ -21,9 +21,10 @@ def softmax(predictions):
       probs = predictions - np.max(predictions)
       probs = np.exp(probs) / np.sum(np.exp(probs))
     elif len(predictions.shape) > 1:
-      probs = predictions - np.max(predictions, axis=1)[:,np.newaxis]
-      probs = np.exp(probs) / np.sum(np.exp(probs), axis=1)[:,np.newaxis]
+      probs = predictions - np.max(predictions, axis=1)[:, np.newaxis]
+      probs = np.exp(probs) / np.sum(np.exp(probs), axis=1)[:, np.newaxis]
     return probs
+
 
 def cross_entropy_loss(probs, target_index):
     '''
@@ -46,8 +47,7 @@ def cross_entropy_loss(probs, target_index):
       row_index = None
     elif len(probs.shape) > 1:
       N = probs.shape[0]
-      row_index = np.arange(N)[:, None]
-
+      row_index = range(N)
     H = -np.mean(np.log(probs[row_index, target_index]))
     return H
 
@@ -77,12 +77,12 @@ def softmax_with_cross_entropy(predictions, target_index):
       row_index = None
     elif len(predictions.shape) > 1:
       N = predictions.shape[0]
-      row_index = np.arange(N)[:, None]
+      row_index = range(N)
 
-    dprediction = softmax(predictions)
+    dprediction = softmax(predictions).copy()
     loss = cross_entropy_loss(softmax(predictions), target_index)
     dprediction[row_index, target_index] -= 1
-    dprediction /=N
+    dprediction /= N
     return loss, dprediction
 
 
@@ -104,7 +104,7 @@ def l2_regularization(W, reg_strength):
     # Done
     loss, grad = reg_strength*np.sum(W**2), 2*reg_strength*W
     return loss, grad
-    
+
 
 def linear_softmax(X, W, target_index):
     '''
@@ -121,7 +121,6 @@ def linear_softmax(X, W, target_index):
 
     '''
     predictions = np.dot(X, W)
-
     # TODO implement prediction and gradient over W
     # Your final implementation shouldn't have any loops
     # Done below
@@ -138,7 +137,7 @@ class LinearSoftmaxClassifier():
             epochs=1):
         '''
         Trains linear classifier
-        
+
         Arguments:
           X, np array (num_samples, num_features) - training data
           y, np array of int (num_samples) - labels
@@ -147,7 +146,7 @@ class LinearSoftmaxClassifier():
           reg, float - L2 regularization strength
           epochs, int - number of epochs
         '''
-
+        np.random.seed(42)
         num_train = X.shape[0]
         num_features = X.shape[1]
         num_classes = np.max(y)+1
@@ -166,41 +165,32 @@ class LinearSoftmaxClassifier():
             # Apply gradient to weights using learning rate
             # Don't forget to add both cross-entropy loss
             # and regularization!
+
             for batch in batches_indices:
                 x_batch, y_batch = X[batch], y[batch]
-                loss_ce, dW_ce = linear_softmax(x_batch, self.W, y_batch)
+                loss_fn, dW_fn = linear_softmax(x_batch, self.W, y_batch)
                 loss_reg, dW_reg = l2_regularization(self.W, reg)
-                loss, dW = loss_ce + loss_reg, dW_ce + dW_reg
+
+                loss = loss_fn + loss_reg
+                dW = dW_fn + dW_reg
 
                 self.W -= learning_rate*dW
                 loss_history.append(loss)
             # end
-            print("Epoch %i, loss: %f" % (epoch, loss))
-
+            # print("Epoch %i, loss: %f" % (epoch, loss))
         return loss_history
 
     def predict(self, X):
         '''
         Produces classifier predictions on the set
-       
+
         Arguments:
           X, np array (test_samples, num_features)
 
         Returns:
           y_pred, np.array of int (test_samples)
         '''
-        y_pred = np.zeros(X.shape[0], dtype=np.int)
-
         # TODO Implement class prediction
         # Your final implementation shouldn't have any loops
-        y_pred = np.argmax(np.dot(X, self.W), axis=1)
+        y_pred = np.argmax(X.dot(self.W), axis=1)
         return y_pred
-
-
-
-                
-                                                          
-
-            
-
-                
