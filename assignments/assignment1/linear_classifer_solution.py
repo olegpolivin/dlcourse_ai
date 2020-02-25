@@ -79,8 +79,8 @@ def softmax_with_cross_entropy(predictions, target_index):
       N = predictions.shape[0]
       row_index = range(N)
 
-    dprediction = softmax(predictions).copy()
-    loss = cross_entropy_loss(softmax(predictions), target_index)
+    dprediction = softmax(predictions)
+    loss = cross_entropy_loss(dprediction, target_index)
     dprediction[row_index, target_index] -= 1
     dprediction /= N
     return loss, dprediction

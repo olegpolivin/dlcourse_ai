@@ -53,7 +53,7 @@ class KNN:
         num_test = X.shape[0]
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
-            x_test = X[i_test, :]
+            x_test = X[i_test]
             for i_train in range(num_train):
                 # TODO: Fill dists[i_test][i_train]
                 # Done below
@@ -98,7 +98,6 @@ class KNN:
         num_train = self.train_X.shape[0]
         num_test = X.shape[0]
         # Using float32 to to save memory - the default is float64
-        dists = np.zeros((num_test, num_train), np.float32)
         # TODO: Implement computing all distances with no loops!
         # Done below
         dists = np.sum(np.abs(X[:, np.newaxis] - self.train_X), axis=2)

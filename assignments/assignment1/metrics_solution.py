@@ -1,3 +1,6 @@
+import warnings
+
+
 def binary_classification_metrics(prediction, ground_truth):
     '''
     Computes metrics for binary classification
@@ -25,8 +28,13 @@ def binary_classification_metrics(prediction, ground_truth):
 
     precision = tp/predicted_positive
     recall = tp/sum(ground_truth)
-    f1 = 2/(1/recall + 1/precision)
 
+    # Check that precision/recall are not zero
+    if recall > 0 and precision > 0:
+        f1 = 2/(1/recall + 1/precision)
+    else:
+        warnings.warn('Either precision or recall equal zero. Cannot calculate proper F1-measure')
+        f1 = 0
     accuracy = sum(prediction == ground_truth) / len(ground_truth)
     return precision, recall, f1, accuracy
 
