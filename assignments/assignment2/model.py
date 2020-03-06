@@ -18,7 +18,11 @@ class TwoLayerNet:
         """
         self.reg = reg
         # TODO Create necessary layers
-        raise Exception("Not implemented!")
+        self.sequential = [
+          FullyConnectedLayer(n_input, hidden_layer_size),
+          ReLULayer(),
+          FullyConnectedLayer(hidden_layer_size, n_output)
+        ]
 
     def compute_loss_and_gradients(self, X, y):
         """
@@ -33,16 +37,28 @@ class TwoLayerNet:
         # clear parameter gradients aggregated from the previous pass
         # TODO Set parameter gradient to zeros
         # Hint: using self.params() might be useful!
-        raise Exception("Not implemented!")
-        
+        params = self.params()
+        for param_name, param in params.items():
+            param.grad = np.zeros_like(param.grad)
+
         # TODO Compute loss and fill param gradients
         # by running forward and backward passes through the model
-        
+        out = X
+        for module in self.sequential:
+          out = module.forward(out)
+        loss, d_preds = softmax_with_cross_entropy(out, y)
+
+        d_out = d_preds
+        for module in self.sequential[::-1]:
+          d_out = module.backward(d_out)
         # After that, implement l2 regularization on all params
         # Hint: self.params() is useful again!
-        raise Exception("Not implemented!")
-
-        return loss
+        loss_reg = 0
+        params = self.params()
+        for param_name, param in params.items():
+          param.grad += 2*self.reg*param.value
+          loss_reg += np.sum(param.value**2)
+        return loss + self.reg * loss_reg
 
     def predict(self, X):
         """
@@ -57,16 +73,17 @@ class TwoLayerNet:
         # TODO: Implement predict
         # Hint: some of the code of the compute_loss_and_gradients
         # can be reused
-        pred = np.zeros(X.shape[0], np.int)
-
-        raise Exception("Not implemented!")
+        pred = X
+        for module in self.sequential:
+          pred = module.forward(pred)
+        pred = np.argmax(pred, axis=1)
         return pred
 
     def params(self):
         result = {}
 
         # TODO Implement aggregating all of the params
-
-        raise Exception("Not implemented!")
-
+        for i, module in enumerate(self.sequential):
+          for key, param in module.params().items():
+            result[key + '_' + str(i)] = param
         return result
