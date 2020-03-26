@@ -243,9 +243,9 @@ class ConvolutionalLayer:
         for y in range(out_height):
             for x in range(out_width):
                 # TODO: Implement forward pass for specific location
-                Xf = X[:, x: x + filter_size, y: y + filter_size, :]
+                Xf = X[:, y: y + filter_size, x: x + filter_size,  :]
                 out = (Xf.reshape(batch_size, -1)).dot(W_reshaped)
-                conv_layer_out[:, x, y, :] = out + self.B.value
+                conv_layer_out[:, y, x, :] = out + self.B.value
         return conv_layer_out
 
     def backward(self, d_out):
@@ -277,13 +277,13 @@ class ConvolutionalLayer:
                 # the parameters (W and B)
 
                 # Gradient wrt weights
-                Xf = X[:, x: x + self.filter_size, y: y + self.filter_size, :]
-                out = Xf.reshape(batch_size, -1).T.dot(d_out[:, x, y, :])
+                Xf = X[:, y: y + self.filter_size, x: x + self.filter_size, :]
+                out = Xf.reshape(batch_size, -1).T.dot(d_out[:, y, x, :])
                 Wgrad += out.reshape(self.filter_size, self.filter_size, channels, out_channels)
 
                 # Gradient wrt input
-                gradinput = d_out[:, x, y, :].dot(W_reshaped.T).reshape(batch_size, self.filter_size, self.filter_size, channels)
-                d_input[:, x: x + self.filter_size, y: y + self.filter_size, :] += gradinput
+                gradinput = d_out[:, y, x, :].dot(W_reshaped.T).reshape(batch_size, self.filter_size, self.filter_size, channels)
+                d_input[:, y: y + self.filter_size, x: x + self.filter_size, :] += gradinput
 
         # Cut off the padding
         if self.padding:
@@ -315,31 +315,47 @@ class MaxPoolingLayer:
         self.X = None
 
     def forward(self, X):
+        self.X = X
         batch_size, height, width, channels = X.shape
         pool_size, stride = self.stride, self.pool_size
         out_height = int((height - pool_size)/stride+1)
         out_width = int((width - pool_size)/stride+1)
-        # TODO: Implement forward pass
-        # Hint: setup variables that hold the result
-        # and one x/y location at a time in the loop below
-        # It's ok to use loops for going over width and height
-        # but try to avoid having any other loops
-        maxpool_out = np.zeros((batch_size, out_height, out_width, channels))
-        for y in range(out_height):
-            for x in range(out_width):
-                # TODO: Implement forward pass for specific location
-                max_elem = np.max(X[:, x: x + pool_size, y: y + pool_size, :])
-                print(max_elem)
-                conv_layer_out[:, x, y, :] = out + self.B.value
         # TODO: Implement maxpool forward pass
         # Hint: Similarly to Conv layer, loop on
         # output x/y dimension
-        raise Exception("Not implemented!")
+        maxpoolout = np.zeros((batch_size, out_height, out_width, channels))
+        self.mask = {}
+        for y in range(out_height):
+            for x in range(out_width):
+              X_F = X[:, y*stride: y*stride + pool_size, x*stride: x*stride + pool_size, :]
+              maxpoolout[:, y, x, :] = np.amax(X_F, axis=(1,2)).reshape(batch_size, channels)
+
+              mask = np.zeros_like(X_F)
+              X_F_rshpd = X_F.reshape(batch_size, pool_size*pool_size, channels)
+              idx = X_F_rshpd.argmax(1)
+              ax1, ax2 = np.indices((batch_size, channels))
+              mask.reshape(mask.shape[0], mask.shape[1] * mask.shape[2], mask.shape[3])[ax1, idx, ax2] = 1
+              self.mask[(y,x)] = mask
+        return maxpoolout
+
 
     def backward(self, d_out):
         # TODO: Implement maxpool backward pass
+        pool_size, stride = self.pool_size, self.stride
         batch_size, height, width, channels = self.X.shape
-        raise Exception("Not implemented!")
+        _, out_height, out_width, out_channels = d_out.shape
+        d_input = np.zeros((batch_size, height, width, channels))
+        for y in range(out_height):
+              start_h = y*stride
+              end_h = start_h + pool_size
+            for x in range(out_width):
+              start_w = x*stride
+              end_w = start_w + pool_size
+              mask = self.mask[(y, x)]
+
+              d_input[:, start_h: end_h, start_w: end_w, :] = d_out[:, y, x, :]\
+                .reshape(batch_size,1,1,channels)*mask
+        return d_input
 
     def params(self):
         return {}
