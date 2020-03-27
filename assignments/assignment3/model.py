@@ -27,7 +27,21 @@ class ConvNet:
         conv2_channels, int - number of filters in the 2nd conv layer
         """
         # TODO Create necessary layers
-        im_width, im_height, im_channels = input_shape
+        width, height, im_channels = input_shape
+
+        out_height_conv1 = int((height - 3 + 2*1) / 1 + 1)
+        out_width_conv1 = int((width - 3 + 2*1) / 1 + 1)
+
+        out_height_maxpool1 = int((out_height_conv1 - 4)/2+1)
+        out_width_maxpool1 = int((out_width_conv1 - 4)/2+1)
+
+        out_height_conv2 = int((out_height_maxpool1 - 3 + 2*1) / 1 + 1)
+        out_width_conv2 = int((out_width_maxpool1 - 3 + 2*1) / 1 + 1)
+
+        out_height_maxpool2 = int((out_height_conv2 - 4)/2+1)
+        out_width_maxpool2 = int((out_width_conv2 - 4)/2+1)
+
+        neurons_in_fc = out_height_maxpool2*out_width_maxpool2*conv2_channels
         self.sequential = [
             ConvolutionalLayer(im_channels, conv1_channels, filter_size=3, padding=1),
             ReLULayer(),
@@ -36,7 +50,7 @@ class ConvNet:
             ReLULayer(),
             MaxPoolingLayer(pool_size = 4, stride = 2),
             Flattener(),
-            FullyConnectedLayer(72, n_output_classes)
+            FullyConnectedLayer(neurons_in_fc, n_output_classes)
         ]
 
 
