@@ -32,12 +32,12 @@ def softmax(predictions):
     # Your final implementation shouldn't have any loops
     # Done below
     if len(predictions.shape) == 1:
-      # batch_size of 1
-      probs = predictions - np.max(predictions)
-      probs = np.exp(probs) / np.sum(np.exp(probs))
+        # batch_size of 1
+        probs = predictions - np.max(predictions)
+        probs = np.exp(probs) / np.sum(np.exp(probs))
     elif len(predictions.shape) > 1:
-      probs = predictions - np.max(predictions, axis=1)[:, np.newaxis]
-      probs = np.exp(probs) / np.sum(np.exp(probs), axis=1)[:, np.newaxis]
+        probs = predictions - np.max(predictions, axis=1)[:, np.newaxis]
+        probs = np.exp(probs) / np.sum(np.exp(probs), axis=1)[:, np.newaxis]
     return probs
 
 
@@ -56,11 +56,11 @@ def cross_entropy_loss(probs, target_index):
     # Your final implementation shouldn't have any loops
     # Done below
     if len(probs.shape) == 1:
-      # batch_size of 1
-      row_index = None
+        # batch_size of 1
+        row_index = None
     elif len(probs.shape) > 1:
-      N = probs.shape[0]
-      row_index = range(N)
+        N = probs.shape[0]
+        row_index = range(N)
     H = -np.mean(np.log(probs[row_index, target_index]))
     return H
 
@@ -82,12 +82,12 @@ def softmax_with_cross_entropy(preds, target_index):
     """
     # TODO: Copy from the previous assignment
     if len(preds.shape) == 1:
-      # batch_size of 1
-      N = 1
-      row_index = None
+        # batch_size of 1
+        N = 1
+        row_index = None
     elif len(preds.shape) > 1:
-      N = preds.shape[0]
-      row_index = range(N)
+        N = preds.shape[0]
+        row_index = range(N)
     d_preds = softmax(preds)
     loss = cross_entropy_loss(d_preds, target_index)
     d_preds[row_index, target_index] -= 1
@@ -177,28 +177,28 @@ class FullyConnectedLayer:
         # the previous assignment
         W = self.params()['W'].value
         X = self.X
-        
+
         # Gradient wrt to weights
         self.params()['W'].grad = np.dot(X.T, d_out)
-        
+
         # Gradient wrt to bias
-        self.params()['B'].grad = np.sum(d_out, axis=0).reshape(1,-1)
-        
+        self.params()['B'].grad = np.sum(d_out, axis=0).reshape(1, -1)
+
         # Gradient wrt to input
         d_input = np.dot(d_out, W.T)
 
         return d_input
 
     def params(self):
-        return { 'W': self.W, 'B': self.B }
+        return {'W': self.W, 'B': self.B}
 
-    
+
 class ConvolutionalLayer:
     def __init__(self, in_channels, out_channels,
                  filter_size, padding):
         '''
         Initializes the layer
-        
+
         Arguments:
         in_channels, int - number of input channels
         out_channels, int - number of output channels
@@ -218,7 +218,6 @@ class ConvolutionalLayer:
 
         self.padding = padding
 
-
     def forward(self, X):
         batch_size, height, width, channels = X.shape
 
@@ -228,11 +227,11 @@ class ConvolutionalLayer:
 
         # Padding X:
         if self.padding:
-            npad = ((0, 0), (pad_width, pad_width), (pad_width, pad_width), (0,0))
+            npad = ((0, 0), (pad_width, pad_width), (pad_width, pad_width), (0, 0))
             X = np.pad(X, npad, 'constant', constant_values=0)
         stride = 1
-        out_height = int((height - filter_size + 2* pad_width)/stride+1)
-        out_width = int((width - filter_size + 2* pad_width)/stride+1)
+        out_height = int((height - filter_size + 2*pad_width) / stride + 1)
+        out_width = int((width - filter_size + 2*pad_width) / stride + 1)
         # TODO: Implement forward pass
         # Hint: setup variables that hold the result
         # and one x/y location at a time in the loop below
@@ -243,7 +242,7 @@ class ConvolutionalLayer:
         for y in range(out_height):
             for x in range(out_width):
                 # TODO: Implement forward pass for specific location
-                Xf = X[:, y: y + filter_size, x: x + filter_size,  :]
+                Xf = X[:, y: y + filter_size, x: x + filter_size, :]
                 out = (Xf.reshape(batch_size, -1)).dot(W_reshaped)
                 conv_layer_out[:, y, x, :] = out + self.B.value
         return conv_layer_out
@@ -256,7 +255,7 @@ class ConvolutionalLayer:
         X = self.X
         pad_width, filter_size = self.padding, self.filter_size
         if self.padding:
-            npad = ((0, 0), (pad_width, pad_width), (pad_width, pad_width), (0,0))
+            npad = ((0, 0), (pad_width, pad_width), (pad_width, pad_width), (0, 0))
             X = np.pad(X, npad, 'constant', constant_values=0)
 
         batch_size, height, width, channels = X.shape
@@ -266,7 +265,7 @@ class ConvolutionalLayer:
         # Same as forward, setup variables of the right shape that
         # aggregate input gradient and fill them for every location
         # of the output
-        Wgrad   = np.zeros(self.W.value.shape)
+        Wgrad = np.zeros(self.W.value.shape)
         d_input = np.zeros(X.shape)
         W_reshaped = self.W.value.reshape(-1, self.out_channels)
         # Try to avoid having any other loops here too
@@ -293,12 +292,12 @@ class ConvolutionalLayer:
         self.params()['W'].grad = Wgrad
 
         # Gradient wrt to bias
-        self.params()['B'].grad = np.sum(d_out.reshape(-1,out_channels),axis=0)
+        self.params()['B'].grad = np.sum(d_out.reshape(-1, out_channels), axis=0)
 
         return d_input
 
     def params(self):
-        return { 'W': self.W, 'B': self.B }
+        return {'W': self.W, 'B': self.B}
 
 
 class MaxPoolingLayer:
@@ -317,7 +316,7 @@ class MaxPoolingLayer:
     def forward(self, X):
         self.X = X
         batch_size, height, width, channels = X.shape
-        pool_size, stride = self.stride, self.pool_size
+        pool_size, stride = self.pool_size, self.stride
         out_height = int((height - pool_size)/stride+1)
         out_width = int((width - pool_size)/stride+1)
         # TODO: Implement maxpool forward pass
@@ -327,17 +326,16 @@ class MaxPoolingLayer:
         self.mask = {}
         for y in range(out_height):
             for x in range(out_width):
-              X_F = X[:, y*stride: y*stride + pool_size, x*stride: x*stride + pool_size, :]
-              maxpoolout[:, y, x, :] = np.amax(X_F, axis=(1,2)).reshape(batch_size, channels)
+                X_F = X[:, y*stride: y*stride + pool_size, x*stride: x*stride + pool_size, :]
+                maxpoolout[:, y, x, :] = np.amax(X_F, axis=(1, 2)).reshape(batch_size, channels)
 
-              mask = np.zeros_like(X_F)
-              X_F_rshpd = X_F.reshape(batch_size, pool_size*pool_size, channels)
-              idx = X_F_rshpd.argmax(1)
-              ax1, ax2 = np.indices((batch_size, channels))
-              mask.reshape(mask.shape[0], mask.shape[1] * mask.shape[2], mask.shape[3])[ax1, idx, ax2] = 1
-              self.mask[(y,x)] = mask
+                mask = np.zeros_like(X_F)
+                X_F_rshpd = X_F.reshape(batch_size, pool_size*pool_size, channels)
+                idx = X_F_rshpd.argmax(1)
+                ax1, ax2 = np.indices((batch_size, channels))
+                mask.reshape(mask.shape[0], mask.shape[1] * mask.shape[2], mask.shape[3])[ax1, idx, ax2] = 1
+                self.mask[(y, x)] = mask
         return maxpoolout
-
 
     def backward(self, d_out):
         # TODO: Implement maxpool backward pass
@@ -346,15 +344,14 @@ class MaxPoolingLayer:
         _, out_height, out_width, out_channels = d_out.shape
         d_input = np.zeros((batch_size, height, width, channels))
         for y in range(out_height):
-              start_h = y*stride
-              end_h = start_h + pool_size
+            start_h = y*stride
+            end_h = start_h + pool_size
             for x in range(out_width):
-              start_w = x*stride
-              end_w = start_w + pool_size
-              mask = self.mask[(y, x)]
-
-              d_input[:, start_h: end_h, start_w: end_w, :] = d_out[:, y, x, :]\
-                .reshape(batch_size,1,1,channels)*mask
+                start_w = x*stride
+                end_w = start_w + pool_size
+                mask = self.mask[(y, x)]
+                d_input[:, start_h: end_h, start_w: end_w, :] += \
+                    d_out[:, y, x, :].reshape(batch_size, 1, 1, channels)*mask
         return d_input
 
     def params(self):
@@ -367,15 +364,16 @@ class Flattener:
 
     def forward(self, X):
         batch_size, height, width, channels = X.shape
+        self.X_shape = X.shape
 
         # TODO: Implement forward pass
         # Layer should return array with dimensions
         # [batch_size, hight*width*channels]
-        raise Exception("Not implemented!")
+        return X.reshape(batch_size, -1)
 
     def backward(self, d_out):
         # TODO: Implement backward pass
-        raise Exception("Not implemented!")
+        return d_out.reshape(self.X_shape)
 
     def params(self):
         # No params!

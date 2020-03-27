@@ -3,3 +3,5 @@ data/
 .vscode/
 .ipynb_checkpoints/
 __pycache__/
+train_32x32.mat
+test_32x32.mat

@@ -27,7 +27,18 @@ class ConvNet:
         conv2_channels, int - number of filters in the 2nd conv layer
         """
         # TODO Create necessary layers
-        raise Exception("Not implemented!")
+        im_width, im_height, im_channels = input_shape
+        self.sequential = [
+            ConvolutionalLayer(im_channels, conv1_channels, filter_size=3, padding=1),
+            ReLULayer(),
+            MaxPoolingLayer(pool_size = 4, stride = 2),
+            ConvolutionalLayer(conv1_channels, conv2_channels, filter_size=3, padding=1),
+            ReLULayer(),
+            MaxPoolingLayer(pool_size = 4, stride = 2),
+            Flattener(),
+            FullyConnectedLayer(72, n_output_classes)
+        ]
+
 
     def compute_loss_and_gradients(self, X, y):
         """
@@ -44,17 +55,36 @@ class ConvNet:
         # TODO Compute loss and fill param gradients
         # Don't worry about implementing L2 regularization, we will not
         # need it in this assignment
-        raise Exception("Not implemented!")
+        params = self.params()
+        for param_name, param in params.items():
+            param.grad = np.zeros_like(param.grad)
+
+        # TODO Compute loss and fill param gradients
+        # by running forward and backward passes through the model
+        out = X
+        for module in self.sequential:
+            out = module.forward(out)
+        loss, d_preds = softmax_with_cross_entropy(out, y)
+
+        d_out = d_preds
+        for module in self.sequential[::-1]:
+            d_out = module.backward(d_out)
+        return loss
 
     def predict(self, X):
         # You can probably copy the code from previous assignment
-        raise Exception("Not implemented!")
+        pred = X
+        for module in self.sequential:
+            pred = module.forward(pred)
+        pred = np.argmax(pred, axis=1)
+        return pred
 
     def params(self):
         result = {}
 
         # TODO: Aggregate all the params from all the layers
         # which have parameters
-        raise Exception("Not implemented!")
-
+        for i, module in enumerate(self.sequential):
+            for key, param in module.params().items():
+                result[key + '_' + str(i)] = param
         return result
